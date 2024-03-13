@@ -1,36 +1,37 @@
 import 'dart:developer';
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:habit/pages/signup_screen.dart';
-import 'package:habit/pages/home_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:habittrackertute/pages/login.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController cPasswordController = TextEditingController();
 
-  void login() async {
+  void createAccount() async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
+    String cPassword = cPasswordController.text.trim();
 
-    if (email == "" || password == "") {
-      log("Please fill all the fields!");
+    if (email == "" || password == "" || cPassword == "") {
+      log("Please fill all the details!");
+    } else if (password != cPassword) {
+      log("Passwords do not match!");
     } else {
       try {
         UserCredential userCredential = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: email, password: password);
+            .createUserWithEmailAndPassword(email: email, password: password);
         if (userCredential.user != null) {
-          Navigator.popUntil(context, (route) => route.isFirst);
-          Navigator.pushReplacement(
-              context, CupertinoPageRoute(builder: (context) => HomePage()));
+          Navigator.pop(context);
         }
       } on FirebaseAuthException catch (ex) {
         log(ex.code.toString());
@@ -43,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Login"),
+        title: Text("Create an account"),
       ),
       body: SafeArea(
         child: ListView(
@@ -64,30 +65,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: InputDecoration(labelText: "Password"),
                   ),
                   SizedBox(
+                    height: 10,
+                  ),
+                  TextField(
+                    controller: cPasswordController,
+                    decoration: InputDecoration(labelText: "Confirm Password"),
+                  ),
+                  SizedBox(
                     height: 20,
                   ),
                   CupertinoButton(
                     onPressed: () {
-                      login();
+                      createAccount();
                     },
                     color: Colors.blue,
-                    child: Text("Log In"),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  CupertinoButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                              builder: (context) => SignUpScreen()));
-                    },
-                    child: Text("Create an Account"),
-                  ),
+                    child: Text("Create Account"),
+                  )
                 ],
               ),
-            ),
+            )
           ],
         ),
       ),

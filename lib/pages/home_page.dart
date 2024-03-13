@@ -1,10 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:habit/components/habittile.dart';
 import 'package:habit/components/monthly_summary.dart';
 import 'package:habit/components/my_fab.dart';
 import 'package:habit/components/my_alert_box.dart';
 import 'package:habit/data/habit_database.dart';
+import 'package:habit/pages/login.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:habit/theme/themeprovider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -117,9 +122,33 @@ class _HomePageState extends State<HomePage> {
     db.updateDatabase();
   }
 
+  void logOut() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.popUntil(context, (route) => route.isFirst);
+    Navigator.pushReplacement(
+        context, CupertinoPageRoute(builder: (context) => LoginScreen()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text("Habito"), actions: [
+        IconButton(
+          onPressed: () {
+            logOut();
+          },
+          icon: Icon(Icons.exit_to_app),
+        )
+      ]),
+      drawer: Drawer(
+          backgroundColor: Theme.of(context).colorScheme.background,
+          child: Center(
+              child: CupertinoSwitch(
+            value: Provider.of<ThemeProvider>(context).isDarkMode,
+            onChanged: (value) =>
+                Provider.of<ThemeProvider>(context, listen: false)
+                    .toggleTheme(),
+          ))),
       backgroundColor: Colors.grey[300],
       floatingActionButton: MyFloatingActionButton(onPressed: createNewHabit),
       body: ListView(
